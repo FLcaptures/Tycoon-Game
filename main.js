@@ -26,21 +26,21 @@ const mouse = {
   // track the mouse postions for interactivity
   x: undefined,
   y: undefined,
-  clicked: false,
+  clickedX: undefined,
+  clickedY: undefined,
 };
 canvas.addEventListener('mousemove', (event) => {
   mouse.x = event.layerX;
   mouse.y = event.layerY;
-  animate();
-  //grid.render();
+
+  c.clearRect(0, 0, setUpCanvas(), setUpCanvas());
+  grid.render();
 });
 
-canvas.addEventListener('mousedown', (e) => {
-  mouse.clicked = true;
-});
-
-canvas.addEventListener('mouseup', (e) => {
-  mouse.clicked = false;
+canvas.addEventListener('click', (e) => {
+  mouse.clickedX = e.layerX;
+  mouse.clickedY = e.layerY;
+  // mouse.clickedX = true;
 });
 
 const grid = {
@@ -117,12 +117,6 @@ function playGame() {
   grid.squares[Math.floor(Math.random() * grid.squares.length)].color = 'white'; // get a random square and change its color.
 }
 
-function animate() {
-  c.clearRect(0, 0, setUpCanvas(), setUpCanvas());
-  grid.render();
-  requestAnimationFrame(animate);
-}
-
 // ELEMENTS IN CANVAS
 
 function Square(x, y, size, color) {
@@ -143,6 +137,7 @@ function Square(x, y, size, color) {
   };
   this.update = () => {
     if (
+      this.color !== 'white' &&
       mouse.x > this.x &&
       mouse.x < this.x + this.size &&
       mouse.y > this.y &&
@@ -153,17 +148,13 @@ function Square(x, y, size, color) {
       this.color = currentColor;
     }
     if (
-      mouse.clicked &&
-      mouse.x > this.x &&
-      mouse.x < this.x + this.size &&
-      mouse.y > this.y &&
-      mouse.y < this.y + this.size
+      mouse.clickedX > this.x &&
+      mouse.clickedX < this.x + this.size &&
+      mouse.clickedY > this.y &&
+      mouse.clickedY < this.y + this.size
     ) {
       currentColor = 'white';
     }
-
     this.draw();
   };
 }
-
-// hello
