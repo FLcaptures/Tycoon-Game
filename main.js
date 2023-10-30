@@ -14,12 +14,10 @@ function setUpCanvas() {
 // All the Event Listeners
 
 window.addEventListener('resize', () => {
-  console.log(canvas.clientWidth);
-  console.log(canvas.width);
   // add all the render functions inside this resize event listener.
-  setUpCanvas();
+  //setUpCanvas();
   grid.resize();
-  grid.render();
+  // grid.render();
 });
 
 setUpCanvas(); // render the canvas for the first time
@@ -28,22 +26,34 @@ const mouse = {
   // track the mouse postions for interactivity
   x: undefined,
   y: undefined,
+  clicked: false,
 };
 canvas.addEventListener('mousemove', (event) => {
   mouse.x = event.layerX;
   mouse.y = event.layerY;
-  console.log('mousemoving');
-  grid.render();
+  animate();
+  //grid.render();
+});
+
+canvas.addEventListener('mousedown', (e) => {
+  mouse.clicked = true;
+});
+
+canvas.addEventListener('mouseup', (e) => {
+  mouse.clicked = false;
 });
 
 const grid = {
-  size: 9,
+  size: 10,
   squares: [],
   squareSize: () => {
-    setUpCanvas(); // When we add interaction, this should be inside the for loops, so that they update as they move.
+    setUpCanvas(); // This ensures that the square size is relative to the current canvas size.
     let ss = canvas.width / grid.size;
     return ss;
   },
+
+  // Creates the layout of the board and stores it in the squares array.
+
   create: function () {
     for (let i = 0; i < this.size; i++) {
       let row = [];
@@ -57,14 +67,20 @@ const grid = {
         this.squares.push(s);
       }
     }
-    console.log(this.squares[0]);
     this.render();
   },
+
+  // Renders the squares created inside the squares array
+  // always call this function below when any changes are made to a square.
+
   render: function () {
     for (let s of this.squares) {
       s.update();
     }
   },
+
+  // resizes the squares and positions them accordingly.
+
   resize: function () {
     for (let i = 0; i < this.size; i++) {
       for (let j = 0; j < this.size; j++) {
@@ -79,10 +95,33 @@ const grid = {
 
     this.render();
   },
+
+  // resets the color or anything else back to it's original.
+
+  reset: () => {
+    for (let s of this.squares) {
+      s.color = 'black';
+    }
+    this.render();
+  },
+
+  random: () => {
+    let intervalId = setInterval(() => {}, 1000);
+  },
 };
 
 grid.create();
-grid.originalSize = grid.squareSize();
+
+function playGame() {
+  grid.reset(); // this should be grid.reset()
+  grid.squares[Math.floor(Math.random() * grid.squares.length)].color = 'white'; // get a random square and change its color.
+}
+
+function animate() {
+  c.clearRect(0, 0, setUpCanvas(), setUpCanvas());
+  grid.render();
+  requestAnimationFrame(animate);
+}
 
 // ELEMENTS IN CANVAS
 
@@ -96,25 +135,35 @@ function Square(x, y, size, color) {
   this.dx = 1;
   this.dy = 1;
   this.ds = 1;
+  let currentColor = 'black';
   this.draw = () => {
     c.fillStyle = this.color;
     c.fillRect(this.x, this.y, this.size, this.size);
     c.fill();
   };
   this.update = () => {
-    // if (size <= 200) {
-    //   this.size += this.ds;
-    // }
     if (
       mouse.x > this.x &&
       mouse.x < this.x + this.size &&
       mouse.y > this.y &&
       mouse.y < this.y + this.size
     ) {
-      this.color = 'white';
-    } else {
-      //this.color = 'black';
+      this.color = 'rgba(255,255,255,0.1)';
+    } else if (!mouse.clicked) {
+      this.color = currentColor;
     }
+    if (
+      mouse.clicked &&
+      mouse.x > this.x &&
+      mouse.x < this.x + this.size &&
+      mouse.y > this.y &&
+      mouse.y < this.y + this.size
+    ) {
+      currentColor = 'white';
+    }
+
     this.draw();
   };
 }
+
+//
