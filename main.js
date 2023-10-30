@@ -32,11 +32,12 @@ const mouse = {
 canvas.addEventListener('mousemove', (event) => {
   mouse.x = event.layerX;
   mouse.y = event.layerY;
+  console.log('mousemoving');
   grid.render();
 });
 
 const grid = {
-  size: 5,
+  size: 9,
   squares: [],
   squareSize: () => {
     setUpCanvas(); // When we add interaction, this should be inside the for loops, so that they update as they move.
@@ -65,20 +66,31 @@ const grid = {
     }
   },
   resize: function () {
+    for (let i = 0; i < this.size; i++) {
+      for (let j = 0; j < this.size; j++) {
+        const index = i * this.size + j;
+        this.squares[index].x = j * this.squareSize();
+        this.squares[index].y = i * this.squareSize();
+      }
+    }
     for (let s of this.squares) {
       s.size = this.squareSize();
     }
+
     this.render();
   },
 };
 
 grid.create();
+grid.originalSize = grid.squareSize();
 
 // ELEMENTS IN CANVAS
 
 function Square(x, y, size, color) {
   this.x = x;
   this.y = y;
+  this.originalX = this.x;
+  this.originalY = this.y;
   this.size = size;
   this.color = color;
   this.dx = 1;
